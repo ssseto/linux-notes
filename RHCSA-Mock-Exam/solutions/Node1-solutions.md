@@ -834,7 +834,7 @@ If the command completes successfully and `df -h` displays the NFS share mounted
 
 - **Difficulty:** ★
 
-- Configure a user `seto` with a User ID (UID) of `0815`. The password for this user should be `seto`.
+- Configure a user `seto` with a User ID (UID) of `815`. The password for this user should be `seto`.
 
   
 
@@ -843,7 +843,7 @@ If the command completes successfully and `df -h` displays the NFS share mounted
 To create a user with a specific User ID (UID) and ensure it matches the exam criteria, use the `-u` option followed by the UID number:
 
 ```bash
-useradd -u 0815 seto
+useradd -u 815 seto
 ```
 
 #### II. Set the User Password Non-Interactively
@@ -865,10 +865,10 @@ id seto
 Expected Output:
 
 ```ini
-uid=0815(seto) gid=0815(seto) groups=0815(seto)
+uid=815(seto) gid=815(seto) groups=815(seto)
 ```
 
-*(Note: If the `uid=0815` matches perfectly in the command output, the configuration is correct).*
+*(Note: If the `uid=815` matches perfectly in the command output, the configuration is correct).*
 
 ## Command Parameter Explanation
 
@@ -1094,6 +1094,105 @@ The `tar` utility maps compression parameters to specific operational flags:
 
 - Configure the service to automatically mount `/opt/file` to `/dir1` inside the container at startup, and mount `/opt/progress` to `/dir2` inside the container.
 
+#### Ⅰ. Environment Preparation (Root / Sudo Privilege)
+
+Before switching to the unprivileged user, you must enable user lingering. This ensures that the user's systemd manager starts at boot and persists after logout, which is required for the container service to run automatically.
+
+```bash
+# Run as root or a user with sudo privileges
+sudo loginctl enable-linger wallah
+```
+
+#### Ⅱ. Create a Container Image (As User `wallah`)
+
+1. **Switch to the designated user:**
+
+   ```bash
+   su - wallah
+   ```
+
+2. **Download the Containerfile:**
+
+   ```bash
+   wget http://classroom/Containerfile -O Containerfile
+   # Alternatively, using curl:
+   curl -o Containerfile http://classroom/Containerfile
+   ```
+
+3. **Build the container image (named `pdf` without modifying the file):**
+
+   ```bash
+   podman build -t pdf .
+   ```
+
+4. **Verify the image creation:**
+
+   ```bash
+   podman images
+   ```
+
+##### Explanation
+
+- This step downloads the `Containerfile` into the current working directory. The `podman build -t pdf .`command specifies the target image name as `pdf`, and the trailing `.` sets the current directory as the build context.
+
+#### Ⅲ. Configure a Container as a Service (As User `wallah`)
+
+1. **Run the container with specific mounts and naming:**
+
+   ```bash
+   podman run -d --name ascii2pdf \
+     -v /opt/file:/dir1:Z \
+     -v /opt/progress:/dir2:Z \
+     pdf
+   ```
+
+   > **Note:** The `:Z` flag is appended to the volume mounts to automatically configure the SELinux context, ensuring the rootless container has proper permissions to access the host directories.
+
+2. **Create the systemd user configuration directory:**
+
+   ```bash
+   mkdir -p ~/.config/systemd/user/
+   cd ~/.config/systemd/user/
+   ```
+
+3. **Generate the systemd service files:**
+
+   ```bash
+   podman generate systemd --name ascii2pdf --files --new
+   ```
+
+   > **Note:** The `--new` flag ensures that the container is created fresh when the service starts and torn down when it stops, which is the best practice for systemd-managed containers.
+
+4. **Reload the systemd user daemon and enable the service to start immediately:**
+
+   ```bash
+   systemctl --user daemon-reload
+   systemctl --user enable --now container-ascii2pdf.service
+   ```
+
+5. **Verify the service status:**
+
+   ```bash
+   systemctl --user status container-ascii2pdf.service
+   ```
+
+##### Explanation
+
+- **Volume Mounting (`-v`)**: Maps host directories to specified container destinations. The `:Z` flag acts as an essential fix for SELinux permission blocks in Red Hat environments.
+- **Systemd Integration**: Since `loginctl enable-linger` was already executed in Step 1, the systemd user manager will now successfully manage this rootless container service independently, ensuring it starts automatically upon system reboot without manual intervention.
+
+## Core Knowledge Points Covered
+
+- **User Lingering (`loginctl`)**: Enabling persistent user sessions to allow rootless systemd services to auto-start at system boot without manual user login.
+
+- **Podman Container Building**: Utilizing `podman build` with a Containerfile/Dockerfile to create custom container images.
+
+- **Volume Mounting and SELinux**: Managing persistent data by mounting host directories (`-v`) into containers and handling SELinux context flags (`:Z`).
+
+- **Rootless Container Management**: Running and managing containers safely under a non-root user (`wallah`).
+
+- **Systemd User Services**: Generating and managing systemd unit files at the user level (`~/.config/systemd/user/`) using `podman generate systemd`.
+
   
 
 # 15. Add Passwordless sudo Configuration
@@ -1116,9 +1215,7 @@ visudo -f /etc/sudoers.d/sysmgrs
 
 Once inside the editor interface, append the following configuration line:
 
-代码段
-
-```
+```bash
 %sysmgrs ALL=(ALL) NOPASSWD: ALL
 ```
 

@@ -20,9 +20,9 @@ The real RHCSA exam consists of two virtual machines: Node 1 and Node 2. I split
 
 Detailed operation steps, command explanations and key reminders for every question.
 
-3. `my-cram-notes.md`
+3. `review-notes/`
 
-My condensed review notes I memorized before the exam, covering high-weight knowledge points and common traps. 
+Review notes corresponding to the ten RHCSA lectures in my course. These notes summarize the major concepts, commands and lab exercises covered in each class, and can be used as a structured learning path for RHCSA preparation.
 
 ## Important Tips
 

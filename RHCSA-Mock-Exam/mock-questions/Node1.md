@@ -150,7 +150,7 @@
 
 - **Difficulty:** ★
 
-- Configure a user `seto` with a User ID (UID) of `0815`. The password for this user should be `seto`.
+- Configure a user `seto` with a User ID (UID) of `815`. The password for this user should be `seto`.
 
   
 

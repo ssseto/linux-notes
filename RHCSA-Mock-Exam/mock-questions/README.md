@@ -1,3 +1,3 @@
-During the exam, in addition to the desktop at your location, multiple virtual systems will be used to complete the exam. You **do not** have root access to the desktop system, but you have **full root access** to the virtual systems.
+During the exam, in addition to the desktop at your location, multiple virtual systems (Node1, Node2) will be used to complete the exam. You **do not** have root access to the desktop system, but you have **full root access** to the virtual systems.
 
 All exam tasks must be completed on the virtual exam systems. You can select the virtual machine you want to operate and perform actions such as **start**, **shutdown**, **reboot**, **poweroff** (forced shutdown), **console** (open display), and **rebuild**. You can re-view the exam tasks using **Activities --> View Exam** on the desktop.
