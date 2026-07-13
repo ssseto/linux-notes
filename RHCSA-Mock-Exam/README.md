@@ -1,5 +1,15 @@
 # RHCSA Mock Exam Questions & Complete Solutions
 
+## Repository Structure 
+
+```text
+RHCSA-Mock-Exam/
+├── mock-questions/       # Mock exam questions
+├── solutions/         # Solutions
+├── review-notes/    # Lecture review notes
+└── README.md
+```
+
 ## My RHCSA Preparation Story
 
 I am a sophomore majoring in Software Engineering at Hainan University.
